@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organização de Recursos</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Organização de Recursos</h1>
+    <div id="sessao" hidden>
+      <span id="quem"></span>
+      <button type="button" id="sair">Sair</button>
+    </div>
+  </header>
+
+  <p id="aviso" role="alert" aria-live="polite" hidden></p>
+
+  <main>
+    <section id="tela-login">
+      <h2>Entrar</h2>
+      <form id="form-login">
+        <label>E-mail <input type="email" name="email" required autocomplete="username"></label>
+        <label>Senha <input type="password" name="senha" required autocomplete="current-password"></label>
+        <button type="submit">Entrar</button>
+      </form>
+      <details>
+        <summary>Não tenho conta</summary>
+        <form id="form-cadastro">
+          <label>Nome <input name="nome" required></label>
+          <label>E-mail <input type="email" name="email" required></label>
+          <label>Senha (mínimo 6) <input type="password" name="senha" minlength="6" required></label>
+          <button type="submit">Criar conta</button>
+        </form>
+      </details>
+    </section>
+
+    <section id="tela-app" hidden>
+      <h2>Recursos</h2>
+      <form id="form-filtro" class="linha">
+        <label>Tipo
+          <select name="tipo">
+            <option value="">Todos</option>
+            <option value="SALA">Sala</option>
+            <option value="PROFESSOR">Professor</option>
+            <option value="MATERIAL">Material</option>
+          </select>
+        </label>
+        <label>Capacidade mínima <input type="number" name="capacidadeMinima" min="1"></label>
+        <label>Local <input name="localizacao"></label>
+        <label>Competência <input name="competencia"></label>
+        <label>Livre de <input type="datetime-local" name="livreDe"></label>
+        <label>até <input type="datetime-local" name="livreAte"></label>
+        <button type="submit">Pesquisar</button>
+      </form>
+      <div class="tabela"><table id="tabela-recursos"></table></div>
+
+      <h2>Nova reserva</h2>
+      <form id="form-reserva">
+        <p class="dica">Marque os recursos na tabela acima.</p>
+        <div class="linha">
+          <label>Início <input type="datetime-local" name="inicio" required></label>
+          <label>Término <input type="datetime-local" name="fim" required></label>
+          <label>Finalidade <input name="finalidade" maxlength="200"></label>
+          <button type="submit">Reservar</button>
+        </div>
+      </form>
+
+      <h2>Reservas</h2>
+      <div class="tabela"><table id="tabela-reservas"></table></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
