@@ -51,6 +51,7 @@ jobs:
       - uses: grafana/setup-k6-action@v1
 
       - name: Rodar k6
+        shell: bash
         run: |
           mkdir -p perf/saida
           k6 run perf/carga.js 2>&1 | tee perf/saida/k6.txt

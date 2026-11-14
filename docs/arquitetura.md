@@ -133,9 +133,13 @@ Escolhida a terceira. É simples de explicar, vale para sala, professor e materi
 
 Evidência: `ConcorrenciaTest` (10 pedidos simultâneos, 1 reserva) e o teste de carga.
 
-### D2. Conflito evitado gravado depois do rollback
+### D2. Conflito evitado gravado depois que a transação da reserva termina
 
-O pedido recusado sofre rollback, então gravar o conflito na mesma transação perderia o registro. Gravar numa transação nova enquanto a original ainda segura a trava pediria uma segunda conexão do pool com a primeira presa, o que pode esgotar o pool sob carga. Por isso o registro é feito num listener `AFTER_ROLLBACK`, quando a trava já foi solta. A tabela guarda só o id do recurso, sem chave estrangeira.
+O pedido recusado sofre rollback, então gravar o conflito na mesma transação perderia o registro.
+
+A primeira versão gravava num listener `AFTER_ROLLBACK` com transação nova. O teste de carga mostrou que isso estava errado ([DEF-03](defeitos/DEF-03.md)): nessa fase a conexão da transação original ainda não voltou ao pool, então cada pedido recusado precisava de duas conexões. Com 50 usuários, as 10 conexões ficavam presas esperando uma 11ª e as requisições caíam por timeout.
+
+Versão atual: `criar` e `alterar` usam `TransactionTemplate`. A exceção de conflito (`ConflitoDeAgenda`) atravessa o fim da transação, a conexão é devolvida e só então o conflito é gravado, com uma conexão de cada vez. A tabela guarda só o id do recurso, sem chave estrangeira.
 
 ### D3. Auditoria na mesma transação; aviso externo depois do commit
 
