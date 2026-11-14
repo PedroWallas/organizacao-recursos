@@ -54,7 +54,10 @@
         <label>até <input type="datetime-local" name="livreAte"></label>
         <button type="submit">Pesquisar</button>
       </form>
-      <div class="tabela"><table id="tabela-recursos"></table></div>
+      <div class="tabela"><table id="tabela-recursos">
+        <thead><tr><th scope="col">Escolher</th><th scope="col">Nome</th><th scope="col">Tipo</th><th scope="col">Capacidade</th><th scope="col">Local</th><th scope="col">Competência</th><th scope="col">Situação</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
 
       <h2>Nova reserva</h2>
       <form id="form-reserva">
@@ -68,7 +71,10 @@
       </form>
 
       <h2>Reservas</h2>
-      <div class="tabela"><table id="tabela-reservas"></table></div>
+      <div class="tabela"><table id="tabela-reservas">
+        <thead><tr><th scope="col">Recursos</th><th scope="col">Início</th><th scope="col">Término</th><th scope="col">Solicitante</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
     </section>
   </main>
 

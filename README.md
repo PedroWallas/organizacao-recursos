@@ -3,7 +3,7 @@
 Sistema para reservar salas, professores e materiais sem conflito de horário.
 Trabalho final da disciplina Qualidade de Software (TADS, Senac, 2026.2).
 
-Aluno: Pedro Wallas
+Aluno: Pedro Wallas Santana da Silva
 
 ## O que o sistema faz
 

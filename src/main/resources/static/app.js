@@ -41,17 +41,6 @@ function botao(texto, acao) {
   return b;
 }
 
-function cabecalho(tabela, colunas) {
-  tabela.innerHTML = '';
-  const tr = document.createElement('tr');
-  colunas.forEach((c) => {
-    const th = document.createElement('th');
-    th.textContent = c;
-    tr.appendChild(th);
-  });
-  tabela.appendChild(tr);
-}
-
 function formatar(dataHora) {
   return new Date(dataHora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
@@ -63,8 +52,8 @@ function entrar(resposta) {
   $('#sessao').hidden = false;
   $('#tela-login').hidden = true;
   $('#tela-app').hidden = false;
-  carregarRecursos();
-  carregarReservas();
+  void carregarRecursos();
+  void carregarReservas();
 }
 
 function sair() {
@@ -82,8 +71,8 @@ async function carregarRecursos() {
   });
   try {
     const recursos = await api('/recursos?' + filtro);
-    const tabela = $('#tabela-recursos');
-    cabecalho(tabela, ['', 'Nome', 'Tipo', 'Capacidade', 'Local', 'Competência', 'Situação']);
+    const tabela = $('#tabela-recursos tbody');
+    tabela.innerHTML = '';
     recursos.forEach((r) => {
       const tr = document.createElement('tr');
       const marcar = document.createElement('td');
@@ -108,7 +97,7 @@ async function acaoReserva(id, acao) {
   try {
     await api('/reservas/' + id + '/' + acao, { method: 'POST' });
     avisar('Reserva atualizada.', true);
-    carregarReservas();
+    await carregarReservas();
   } catch (e) {
     avisar(e.message);
   }
@@ -117,9 +106,9 @@ async function acaoReserva(id, acao) {
 async function carregarReservas() {
   try {
     const reservas = await api('/reservas');
-    const tabela = $('#tabela-reservas');
+    const tabela = $('#tabela-reservas tbody');
     const gestor = estado.papel !== 'SOLICITANTE';
-    cabecalho(tabela, ['Recursos', 'Início', 'Término', 'Solicitante', 'Status', 'Ações']);
+    tabela.innerHTML = '';
     reservas.forEach((r) => {
       const tr = document.createElement('tr');
       [r.recursos.map((x) => x.nome).join(', '), formatar(r.inicio), formatar(r.fim), r.solicitante, r.status]
@@ -168,7 +157,7 @@ $('#form-cadastro').addEventListener('submit', async (ev) => {
 
 $('#form-filtro').addEventListener('submit', (ev) => {
   ev.preventDefault();
-  carregarRecursos();
+  void carregarRecursos();
 });
 
 $('#form-reserva').addEventListener('submit', async (ev) => {
@@ -182,7 +171,7 @@ $('#form-reserva').addEventListener('submit', async (ev) => {
   try {
     const reserva = await api('/reservas', { method: 'POST', body: JSON.stringify({ ...dados, recursoIds }) });
     avisar(reserva.status === 'SOLICITADA' ? 'Reserva enviada para aprovação.' : 'Reserva confirmada.', true);
-    carregarReservas();
+    await carregarReservas();
   } catch (e) {
     avisar(e.message);
   }

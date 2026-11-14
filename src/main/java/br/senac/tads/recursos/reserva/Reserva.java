@@ -2,6 +2,7 @@ package br.senac.tads.recursos.reserva;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,11 +65,15 @@ public class Reserva {
     public Reserva(Usuario solicitante, Set<Recurso> recursos, LocalDateTime inicio, LocalDateTime fim,
             String finalidade) {
         this.solicitante = solicitante;
-        definir(recursos, inicio, fim, finalidade);
+        aplicar(recursos, inicio, fim, finalidade);
     }
 
     /** Define recursos e periodo. Recurso restrito faz a reserva voltar para aprovacao. */
-    final void definir(Set<Recurso> novosRecursos, LocalDateTime novoInicio, LocalDateTime novoFim,
+    void definir(Set<Recurso> novosRecursos, LocalDateTime novoInicio, LocalDateTime novoFim, String novaFinalidade) {
+        aplicar(novosRecursos, novoInicio, novoFim, novaFinalidade);
+    }
+
+    private void aplicar(Set<Recurso> novosRecursos, LocalDateTime novoInicio, LocalDateTime novoFim,
             String novaFinalidade) {
         this.recursos = new HashSet<>(novosRecursos);
         this.inicio = novoInicio;
@@ -92,8 +97,10 @@ public class Reserva {
         return recursos.stream().anyMatch(Recurso::isRestrito);
     }
 
+    /** Duracao real no fuso do servidor, para contar certo mesmo se houver horario de verao no periodo. */
     public Duration duracao() {
-        return Duration.between(inicio, fim);
+        ZoneId fuso = ZoneId.systemDefault();
+        return Duration.between(inicio.atZone(fuso), fim.atZone(fuso));
     }
 
     public Long getId() {
