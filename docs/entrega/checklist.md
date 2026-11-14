@@ -56,4 +56,4 @@ Formato: item → existe → atualizado → caminho.
 
 - Rodar os testes exige Docker. Está no README, mas quem não tiver Docker só consegue compilar.
 - Revisão por pares não existe (trabalho individual).
-- A tela web ainda não foi aberta no navegador nesta versão.
+- A tela web foi conferida manualmente pelo autor depois deste checklist; não tem teste automatizado.

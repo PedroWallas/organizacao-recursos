@@ -71,11 +71,11 @@ Em todas as rodadas: exatamente 1 reserva por horário disputado.
 
 ## Tela web
 
-**Não verificada nesta versão.** A máquina do autor não tinha Docker durante a preparação da rc1, então a aplicação não foi aberta no navegador. O que existe de evidência:
+**Verificada manualmente pelo autor em 2026-11-14**: a aplicação foi aberta no navegador e funcionou. A verificação não é automatizada e não se repete a cada mudança. Evidência automatizada que existe:
 - a página e seus arquivos são servidos sem login (`AutenticacaoTest.paginaEDocumentacaoSaoPublicas`);
 - todas as rotas que a tela chama são testadas na API, com as mensagens de erro (`$.mensagem`).
 
-Roteiro de verificação manual pendente: login; pesquisa com filtros; reserva de recurso livre e de recurso restrito; mensagem de conflito; aprovação pelo responsável; layout em largura de celular.
+Roteiro para repetir a verificação: login; pesquisa com filtros; reserva de recurso livre e de recurso restrito; mensagem de conflito; aprovação pelo responsável; layout em largura de celular.
 
 ## Conclusão
 

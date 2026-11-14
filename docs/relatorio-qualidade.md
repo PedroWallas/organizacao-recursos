@@ -26,7 +26,7 @@ Durante o trabalho foram encontrados 4 defeitos reais: 3 corrigidos e 1 parcialm
 
 ## 3. Requisitos
 
-Matriz completa em [rtm.md](rtm.md). Todos os RF têm implementação e teste ligados. RF-13 (interface responsiva) tem tela e mensagens de erro claras, mas sem teste automatizado de interface. A tela ainda não foi aberta no navegador nesta versão (sem Docker na máquina de preparação). As mensagens são verificadas pelos testes de API (`$.mensagem`).
+Matriz completa em [rtm.md](rtm.md). Todos os RF têm implementação e teste ligados. RF-13 (interface responsiva) tem tela e mensagens de erro claras, mas sem teste automatizado de interface. A tela foi aberta e conferida manualmente pelo autor em 2026-11-14. As mensagens são verificadas pelos testes de API (`$.mensagem`).
 
 ## 4. Estratégia de testes aplicada
 
@@ -73,7 +73,7 @@ A análise do SonarCloud está no modo automático, que não importa a cobertura
 | Risco | Impacto | Situação |
 |---|---|---|
 | RNF-01 25% acima da meta no p95 (CI com 2 vCPUs compartilhadas) | Baixo | Aceito ([DEF-04](defeitos/DEF-04.md)) |
-| Tela sem teste automatizado e ainda não aberta no navegador nesta versão | Médio | Aceito; verificação manual pendente |
+| Tela sem teste automatizado | Médio | Aceito; conferida manualmente pelo autor |
 | Sem revisão por pares (trabalho individual) | Médio | Aceito; todo código entrou por PR com CI obrigatório |
 | Tabelas criadas pelo Hibernate (`ddl-auto=update`) | Médio em produção | Aceito para a avaliação; migrações antes de produção |
 | Credenciais padrão de desenvolvimento no `application.properties` | Alto se usado fora da máquina local | Mitigado: todas sobrescritas por variável de ambiente, documentado no README |
