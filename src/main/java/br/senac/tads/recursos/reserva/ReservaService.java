@@ -203,11 +203,19 @@ public class ReservaService {
 
     private List<Recurso> travarDisponiveis(PedidoReserva pedido, long ignorar) {
         List<Long> ids = pedido.recursoIds().stream().distinct().toList();
+        // DEF-04: 1a checagem sem trava. Pedido para horario ja ocupado e recusado aqui, sem entrar na fila da trava.
+        conferirDisponiveis(recursos.findAllById(ids), ids.size(), pedido, ignorar);
+        // 2a checagem com trava: garante que ninguem reservou entre a primeira checagem e a trava.
         List<Recurso> travados = recursos.travar(ids);
-        if (travados.size() != ids.size()) {
+        conferirDisponiveis(travados, ids.size(), pedido, ignorar);
+        return travados;
+    }
+
+    private void conferirDisponiveis(List<Recurso> encontrados, int pedidos, PedidoReserva pedido, long ignorar) {
+        if (encontrados.size() != pedidos) {
             throw ErroApi.naoEncontrado("Um ou mais recursos não existem");
         }
-        for (Recurso recurso : travados) {
+        for (Recurso recurso : encontrados) {
             if (recurso.isEmManutencao()) {
                 throw ErroApi.regraViolada(recurso.getNome() + " está em manutenção");
             }
@@ -215,7 +223,6 @@ public class ReservaService {
                 throw new ConflitoDeAgenda(recurso, pedido.inicio(), pedido.fim());
             }
         }
-        return travados;
     }
 
     private boolean temMaterialPendente(Reserva reserva) {

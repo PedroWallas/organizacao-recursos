@@ -3,6 +3,7 @@ package br.senac.tads.recursos.reserva;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,19 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     default boolean existeConflito(Long recursoId, LocalDateTime inicio, LocalDateTime fim, long ignorar) {
         return existeReservaNoPeriodo(recursoId, inicio, fim, ignorar, StatusReserva.OCUPAM_AGENDA);
+    }
+
+    @Query("""
+            select distinct rc.id from Reserva r join r.recursos rc
+            where r.status in :status
+              and r.inicio < :fim
+              and r.fim > :inicio
+            """)
+    Set<Long> idsComReservaNoPeriodo(LocalDateTime inicio, LocalDateTime fim, Collection<StatusReserva> status);
+
+    /** Todos os recursos ocupados no periodo, numa consulta so (a pesquisa nao precisa ir recurso por recurso). */
+    default Set<Long> recursosOcupados(LocalDateTime inicio, LocalDateTime fim) {
+        return idsComReservaNoPeriodo(inicio, fim, StatusReserva.OCUPAM_AGENDA);
     }
 
     boolean existsByRecursos_Id(Long recursoId);
