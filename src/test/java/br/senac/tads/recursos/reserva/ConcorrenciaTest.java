@@ -26,7 +26,8 @@ import br.senac.tads.recursos.suporte.TesteIntegracao;
 /** Pedidos disparados ao mesmo tempo para o mesmo horario: so um pode ganhar. */
 class ConcorrenciaTest extends TesteIntegracao {
 
-    private static final int PEDIDOS = 10;
+    /** Quatro vezes o pool de conexoes (10): pega esgotamento de pool, como o do DEF-03. */
+    private static final int PEDIDOS = 40;
 
     @Autowired
     private ReservaService service;
@@ -36,7 +37,7 @@ class ConcorrenciaTest extends TesteIntegracao {
     private ConflitoEvitadoRepository conflitos;
 
     @Test
-    void dezPedidosSimultaneosParaAMesmaSalaGeramUmaReserva() throws Exception {
+    void quarentaPedidosSimultaneosParaAMesmaSalaGeramUmaReserva() throws Exception {
         Recurso sala = sala("Sala 1");
 
         List<HttpStatus> resultados = disparar(i -> pedido(sala));
