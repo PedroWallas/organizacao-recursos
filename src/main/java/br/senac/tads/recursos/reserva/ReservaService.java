@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Supplier;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -12,13 +13,13 @@ import jakarta.validation.constraints.Size;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import br.senac.tads.recursos.comum.ErroApi;
 import br.senac.tads.recursos.material.RetiradaMaterialRepository;
 import br.senac.tads.recursos.recurso.Recurso;
 import br.senac.tads.recursos.recurso.RecursoRepository;
 import br.senac.tads.recursos.recurso.TipoRecurso;
-import br.senac.tads.recursos.reserva.Eventos.ConflitoDetectado;
 import br.senac.tads.recursos.reserva.Eventos.StatusAlterado;
 import br.senac.tads.recursos.seguranca.UsuarioLogado;
 import br.senac.tads.recursos.seguranca.UsuarioRepository;
@@ -57,21 +58,45 @@ public class ReservaService {
     private final UsuarioRepository usuarios;
     private final HistoricoReservaRepository historico;
     private final RetiradaMaterialRepository retiradas;
+    private final ConflitoEvitadoRepository conflitos;
     private final ApplicationEventPublisher eventos;
+    private final TransactionTemplate transacao;
 
     public ReservaService(ReservaRepository reservas, RecursoRepository recursos, UsuarioRepository usuarios,
             HistoricoReservaRepository historico, RetiradaMaterialRepository retiradas,
-            ApplicationEventPublisher eventos) {
+            ConflitoEvitadoRepository conflitos, ApplicationEventPublisher eventos, TransactionTemplate transacao) {
         this.reservas = reservas;
         this.recursos = recursos;
         this.usuarios = usuarios;
         this.historico = historico;
         this.retiradas = retiradas;
+        this.conflitos = conflitos;
         this.eventos = eventos;
+        this.transacao = transacao;
     }
 
-    @Transactional
     public ReservaResposta criar(PedidoReserva pedido, UsuarioLogado usuario) {
+        return registrandoConflito(() -> transacao.execute(status -> criarNaTransacao(pedido, usuario)));
+    }
+
+    public ReservaResposta alterar(Long id, PedidoReserva pedido, UsuarioLogado usuario) {
+        return registrandoConflito(() -> transacao.execute(status -> alterarNaTransacao(id, pedido, usuario)));
+    }
+
+    /**
+     * DEF-03: o conflito so e gravado depois que a transacao da reserva terminou e devolveu a conexao ao pool.
+     * Gravar com a conexao ainda presa fazia cada pedido recusado precisar de duas conexoes e travava o pool sob carga.
+     */
+    private ReservaResposta registrandoConflito(Supplier<ReservaResposta> operacao) {
+        try {
+            return operacao.get();
+        } catch (ConflitoDeAgenda e) {
+            conflitos.save(new ConflitoEvitado(e.getRecursoId(), e.getInicio(), e.getFim()));
+            throw e;
+        }
+    }
+
+    private ReservaResposta criarNaTransacao(PedidoReserva pedido, UsuarioLogado usuario) {
         validarPeriodo(pedido);
         List<Recurso> travados = travarDisponiveis(pedido, ReservaRepository.NENHUMA);
         Reserva reserva = new Reserva(usuarios.getReferenceById(usuario.id()), new HashSet<>(travados),
@@ -81,8 +106,7 @@ public class ReservaService {
         return ReservaResposta.de(reserva);
     }
 
-    @Transactional
-    public ReservaResposta alterar(Long id, PedidoReserva pedido, UsuarioLogado usuario) {
+    private ReservaResposta alterarNaTransacao(Long id, PedidoReserva pedido, UsuarioLogado usuario) {
         validarPeriodo(pedido);
         Reserva reserva = carregar(id);
         exigirDonoOuGestor(reserva, usuario);
@@ -188,8 +212,7 @@ public class ReservaService {
                 throw ErroApi.regraViolada(recurso.getNome() + " está em manutenção");
             }
             if (reservas.existeConflito(recurso.getId(), pedido.inicio(), pedido.fim(), ignorar)) {
-                eventos.publishEvent(new ConflitoDetectado(recurso.getId(), pedido.inicio(), pedido.fim()));
-                throw ErroApi.conflito(recurso.getNome() + " já está reservado nesse horário");
+                throw new ConflitoDeAgenda(recurso, pedido.inicio(), pedido.fim());
             }
         }
         return travados;

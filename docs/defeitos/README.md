@@ -13,3 +13,4 @@ Cada defeito tem um arquivo com passos para reproduzir, causa, correção e test
 |---|---|---|---|---|
 | [DEF-01](DEF-01.md) | Reserva podia ser encerrada ou alterada com material ainda retirado | Alta | Corrigido | `RetiradaMaterialTest.naoCancelaNemMarcaAusenciaComMaterialPendente`, `...naoAlteraReservaComMaterialPendente` |
 | [DEF-02](DEF-02.md) | Sistema aceitava reserva com início no passado | Média | Corrigido | `RegrasReservaTest.naoReservaNemRemarcaParaOPassado` |
+| [DEF-03](DEF-03.md) | Pool de conexões travava sob carga quando havia conflito de reserva | Alta | Corrigido | `ConcorrenciaTest` com 40 pedidos simultâneos; teste de carga |
