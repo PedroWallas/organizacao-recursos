@@ -158,3 +158,7 @@ Códigos usados: 400 dados inválidos, 401 sem login, 403 sem permissão, 404 n�
 | Teste de carga | [plano](docs/performance/plano.md) e resultados ([01](docs/performance/resultado-01.md), [02](docs/performance/resultado-02.md), [03](docs/performance/resultado-03.md), [04](docs/performance/resultado-04.md)) |
 | Defeitos | [docs/defeitos/](docs/defeitos/) |
 | Relatório de qualidade | [docs/relatorio-qualidade.md](docs/relatorio-qualidade.md) |
+| Checklist da entrega | [docs/entrega/checklist.md](docs/entrega/checklist.md) |
+| Pacote de evidências | [docs/evidencias/README.md](docs/evidencias/README.md) |
+| Decisão de qualidade | [docs/decisao-qualidade.md](docs/decisao-qualidade.md) |
+| Mudanças por versão | [CHANGELOG.md](CHANGELOG.md) |
