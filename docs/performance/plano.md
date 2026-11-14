@@ -25,6 +25,7 @@ Limite conhecido: k6, aplicação e banco dividem a mesma máquina, então os te
 - 1 sala disputada ("Sala da carga") + 20 salas extras, criadas pelo administrador.
 - 50 solicitantes cadastrados pela API, cada um com seu token.
 - Horários: um dia diferente por iteração (hoje + 30 a 34 dias), 8h às 10h.
+- Aquecimento (incluído a partir da rodada 04): 200 consultas e 200 tentativas de reserva numa sala separada, em horários que não se misturam com os medidos. Essas requisições ficam fora das métricas dos cenários. Motivo: a aplicação sobe do zero a cada execução no Actions, e sem aquecimento o p95 mede a compilação JIT da partida a frio, não o regime normal. As rodadas 01 a 03 foram sem aquecimento.
 
 ## Modelo de carga
 

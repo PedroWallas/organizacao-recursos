@@ -55,6 +55,16 @@ export function setup() {
       { headers: JSON_HEADERS });
     tokens.push(login(email, 'carga123'));
   }
+
+  // Aquecimento da JVM: as requisicoes do setup nao entram nas metricas dos cenarios (sem a tag "cenario").
+  // Sem isso o p95 mede a compilacao JIT da partida a frio, e nao o regime normal da aplicacao.
+  const aquecimento = http.post(`${BASE}/recursos`, JSON.stringify({ nome: 'Sala de aquecimento', tipo: 'SALA' }), auth)
+    .json('id');
+  for (let i = 0; i < 200; i++) {
+    const { inicio, fim } = horario(100 + (i % 50));
+    http.get(`${BASE}/recursos?tipo=SALA&livreDe=${inicio}&livreAte=${fim}`, auth);
+    http.post(`${BASE}/reservas`, JSON.stringify({ recursoIds: [aquecimento], inicio, fim }), auth);
+  }
   return { sala, tokens };
 }
 

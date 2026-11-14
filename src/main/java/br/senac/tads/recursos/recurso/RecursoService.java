@@ -3,6 +3,7 @@ package br.senac.tads.recursos.recurso;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -52,13 +53,17 @@ public class RecursoService {
     @Transactional(readOnly = true)
     public List<RecursoResposta> pesquisar(Filtro filtro) {
         boolean filtraDisponibilidade = validarPeriodo(filtro);
+        // DEF-04: uma consulta para todos os ocupados, em vez de uma por recurso
+        Set<Long> ocupados = filtraDisponibilidade
+                ? reservas.recursosOcupados(filtro.livreDe(), filtro.livreAte())
+                : Set.of();
         return recursos.findAllByOrderByNomeAsc().stream()
                 .filter(r -> filtro.tipo() == null || r.getTipo() == filtro.tipo())
                 .filter(r -> filtro.capacidadeMinima() == null
                         || (r.getCapacidade() != null && r.getCapacidade() >= filtro.capacidadeMinima()))
                 .filter(r -> contem(r.getLocalizacao(), filtro.localizacao()))
                 .filter(r -> contem(r.getCompetencia(), filtro.competencia()))
-                .filter(r -> !filtraDisponibilidade || estaLivre(r, filtro.livreDe(), filtro.livreAte()))
+                .filter(r -> !filtraDisponibilidade || (!r.isEmManutencao() && !ocupados.contains(r.getId())))
                 .map(RecursoResposta::de)
                 .toList();
     }
@@ -98,10 +103,6 @@ public class RecursoService {
     private static void aplicar(Recurso recurso, RecursoDados d) {
         recurso.atualizar(d.nome().trim(), d.tipo(), d.capacidade(), d.localizacao(), d.competencia(), d.restrito(),
                 d.emManutencao());
-    }
-
-    private boolean estaLivre(Recurso r, LocalDateTime de, LocalDateTime ate) {
-        return !r.isEmManutencao() && !reservas.existeConflito(r.getId(), de, ate, ReservaRepository.NENHUMA);
     }
 
     private static boolean validarPeriodo(Filtro filtro) {

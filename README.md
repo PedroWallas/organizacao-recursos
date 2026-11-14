@@ -155,6 +155,6 @@ Códigos usados: 400 dados inválidos, 401 sem login, 403 sem permissão, 404 n�
 | Matriz de rastreabilidade | [docs/rtm.md](docs/rtm.md) |
 | Plano de testes | [docs/testes/plano.md](docs/testes/plano.md) |
 | Relatório de testes | [docs/testes/relatorio.md](docs/testes/relatorio.md) |
-| Teste de carga | [docs/performance/plano.md](docs/performance/plano.md) e [docs/performance/resultado-01.md](docs/performance/resultado-01.md) |
+| Teste de carga | [plano](docs/performance/plano.md) e resultados ([01](docs/performance/resultado-01.md), [02](docs/performance/resultado-02.md), [03](docs/performance/resultado-03.md), [04](docs/performance/resultado-04.md)) |
 | Defeitos | [docs/defeitos/](docs/defeitos/) |
 | Relatório de qualidade | [docs/relatorio-qualidade.md](docs/relatorio-qualidade.md) |
