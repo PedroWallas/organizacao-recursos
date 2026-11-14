@@ -41,8 +41,8 @@ Liga cada requisito ao código que o implementa e ao teste que prova. Testes em 
 
 | Id | Requisito | Meta | Evidência |
 |---|---|---|---|
-| RNF-01 | Consulta de disponibilidade sob carga | 50 usuários, p95 ≤ 300 ms, erro ≤ 1% | `docs/performance/resultado-01.md` |
-| RNF-02 | Criação de reserva disputada sob carga | 50 usuários no mesmo horário, p95 ≤ 500 ms, exatamente 1 reserva por horário, nenhum 5xx | `docs/performance/resultado-01.md` |
+| RNF-01 | Consulta de disponibilidade sob carga | 50 usuários, p95 ≤ 300 ms, erro ≤ 1% | `docs/performance/resultado-04.md` (rodadas 01-03 no mesmo diretório) |
+| RNF-02 | Criação de reserva disputada sob carga | 50 usuários no mesmo horário, p95 ≤ 500 ms, exatamente 1 reserva por horário, nenhum 5xx | `docs/performance/resultado-04.md` (rodadas 01-03 no mesmo diretório) |
 | RNF-03 | Cobertura de testes | ≥ 80% linhas, ≥ 70% branches (build falha abaixo disso) | JaCoCo no CI |
 | RNF-04 | Qualidade estática | Quality Gate do SonarCloud aprovado | Link no `docs/evidencias/README.md` |
 | RNF-05 | Reprodutibilidade | Subir só com o README em máquina limpa | `docs/entrega/checklist.md` |
