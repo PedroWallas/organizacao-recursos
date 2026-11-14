@@ -93,6 +93,28 @@ class RetiradaMaterialTest extends TesteIntegracao {
         acao("/reservas/" + id + "/concluir", responsavel).andExpect(jsonPath("$.status").value("CONCLUIDA"));
     }
 
+    /** Regressao do DEF-01. */
+    @Test
+    void naoCancelaNemMarcaAusenciaComMaterialPendente() throws Exception {
+        Long id = novaReserva(ana, AMANHA_8H, AMANHA_8H.plusHours(1), sala, projetor);
+        enviar("/reservas/" + id + "/retiradas", responsavel, projetor()).andExpect(status().isCreated());
+
+        acao("/reservas/" + id + "/cancelar", ana).andExpect(status().isConflict());
+        acao("/reservas/" + id + "/nao-compareceu", responsavel).andExpect(status().isConflict());
+        consultar("/reservas/" + id, ana).andExpect(jsonPath("$.status").value("APROVADA"));
+    }
+
+    /** Regressao do DEF-01: tirar o material da reserva deixava a retirada sem devolucao possivel. */
+    @Test
+    void naoAlteraReservaComMaterialPendente() throws Exception {
+        Long id = novaReserva(ana, AMANHA_8H, AMANHA_8H.plusHours(1), sala, projetor);
+        enviar("/reservas/" + id + "/retiradas", responsavel, projetor()).andExpect(status().isCreated());
+
+        alterar(id, ana, AMANHA_8H, AMANHA_8H.plusHours(1), sala)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensagem").value("Devolva o material retirado antes de alterar a reserva"));
+    }
+
     @Test
     void reservaInexistenteRetorna404() throws Exception {
         enviar("/reservas/999/retiradas", responsavel, projetor()).andExpect(status().isNotFound());

@@ -3,6 +3,7 @@ package br.senac.tads.recursos.reserva;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +46,20 @@ class RegrasReservaTest extends TesteIntegracao {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensagem").value("O término precisa ser depois do início"));
         reservar(ana, AMANHA_8H, AMANHA_8H, sala).andExpect(status().isBadRequest());
+    }
+
+    /** Regressao do DEF-02. */
+    @Test
+    void naoReservaNemRemarcaParaOPassado() throws Exception {
+        Recurso sala = sala("Sala 1");
+        LocalDateTime ontem = AMANHA_8H.minusDays(2);
+
+        reservar(ana, ontem, ontem.plusHours(1), sala)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.mensagem").value("Não é possível reservar um horário que já passou"));
+
+        Long id = novaReserva(ana, AMANHA_8H, AMANHA_8H.plusHours(1), sala);
+        alterar(id, ana, ontem, ontem.plusHours(1), sala).andExpect(status().isUnprocessableEntity());
     }
 
     @Test

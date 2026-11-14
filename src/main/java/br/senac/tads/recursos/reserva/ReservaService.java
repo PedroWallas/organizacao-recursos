@@ -89,6 +89,9 @@ public class ReservaService {
         if (!reserva.podeSerAlterada()) {
             throw ErroApi.conflito("Só é possível alterar reservas solicitadas ou aprovadas");
         }
+        if (temMaterialPendente(reserva)) {
+            throw ErroApi.conflito("Devolva o material retirado antes de alterar a reserva");
+        }
         StatusReserva anterior = reserva.getStatus();
         List<Recurso> travados = travarDisponiveis(pedido, id);
         reserva.definir(new HashSet<>(travados), pedido.inicio(), pedido.fim(), pedido.finalidade());
@@ -120,11 +123,7 @@ public class ReservaService {
 
     @Transactional
     public ReservaResposta concluir(Long id, UsuarioLogado usuario) {
-        Reserva reserva = carregar(id);
-        if (retiradas.existsByReserva_IdAndDevolvidaEmIsNull(id)) {
-            throw ErroApi.conflito("Há material retirado e não devolvido nesta reserva");
-        }
-        return mudar(reserva, StatusReserva.CONCLUIDA, usuario);
+        return mudar(carregar(id), StatusReserva.CONCLUIDA, usuario);
     }
 
     @Transactional
@@ -163,6 +162,10 @@ public class ReservaService {
     private ReservaResposta mudar(Reserva reserva, StatusReserva destino, UsuarioLogado usuario) {
         StatusReserva anterior = reserva.getStatus();
         reserva.mudarPara(destino);
+        // DEF-01: reserva encerrada com material fora deixaria a devolucao sem caminho
+        if (destino.isFinal() && temMaterialPendente(reserva)) {
+            throw ErroApi.conflito("Há material retirado e não devolvido nesta reserva");
+        }
         registrar(reserva, anterior, usuario, destino.name());
         return ReservaResposta.de(reserva);
     }
@@ -192,9 +195,17 @@ public class ReservaService {
         return travados;
     }
 
+    private boolean temMaterialPendente(Reserva reserva) {
+        return retiradas.existsByReserva_IdAndDevolvidaEmIsNull(reserva.getId());
+    }
+
     private static void validarPeriodo(PedidoReserva pedido) {
         if (!pedido.fim().isAfter(pedido.inicio())) {
             throw ErroApi.requisicaoInvalida("O término precisa ser depois do início");
+        }
+        // DEF-02: reserva retroativa ocupava a agenda e distorcia o relatorio de uso
+        if (pedido.inicio().isBefore(LocalDateTime.now())) {
+            throw ErroApi.regraViolada("Não é possível reservar um horário que já passou");
         }
     }
 
