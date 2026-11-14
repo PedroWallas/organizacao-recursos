@@ -64,8 +64,9 @@ public class SegurancaConfig {
         conversor.setJwtGrantedAuthoritiesConverter(papel);
 
         return http
-                // API sem sessao nem cookie: o token vai no cabecalho, entao CSRF nao se aplica
-                .csrf(AbstractHttpConfigurer::disable)
+                // API sem sessao nem cookie: o token vai no cabecalho Authorization, que o navegador nao envia
+                // sozinho em requisicao forjada por outro site. Por isso CSRF nao se aplica aqui.
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR revisado: API stateless com JWT no cabecalho
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(regras -> regras
                         .requestMatchers("/auth/**", "/actuator/health", "/", "/index.html", "/app.js", "/estilo.css",
