@@ -1,0 +1,66 @@
+name: Teste de carga
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  carga:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ADMIN_EMAIL: admin@carga.local
+      ADMIN_SENHA: carga123
+      JWT_SEGREDO: segredo-usado-apenas-no-teste-de-carga-do-ci
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: recursos
+          POSTGRES_USER: recursos
+          POSTGRES_PASSWORD: recursos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U recursos -d recursos"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Empacotar
+        run: ./mvnw -B -q -DskipTests package
+
+      - name: Subir aplicação
+        run: |
+          nohup java -jar target/organizacao-recursos-*.jar > app.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/actuator/health && exit 0
+            sleep 2
+          done
+          cat app.log
+          exit 1
+
+      - uses: grafana/setup-k6-action@v1
+
+      - name: Rodar k6
+        run: |
+          mkdir -p perf/saida
+          k6 run perf/carga.js 2>&1 | tee perf/saida/k6.txt
+
+      - name: Publicar resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: carga-${{ github.sha }}
+          path: |
+            perf/saida/
+            app.log
+          retention-days: 30
